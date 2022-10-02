@@ -8,30 +8,50 @@ const GRID_WIDTH = 3;
 
 const main = () => {
     const cells = [[null, null, null], [null, null, null], [null, null, null]];
-    ask(cells, true);
+    loop(cells, true);
 };
 
-const ask = (cells, isX) => {
-    readline.question('Which cells ?', (cell) => {
-        if (cell === 'stop') {
-            readline.close();
-            return;
-        }
+const loop = async (cells, isX) => {
+    const posx = await ask(true);
+    if (posx === 'stop') {
+        readline.close();
+        console.log('bye');
+        return;
+    }
+    const posy = await ask(false);
+    if (isValidInput(posx, posy, cells)) {
+        cells[posx][posy] = isX ? 'X' : 'O';
+        display(cells, !isX);
+    } else {
+        display(cells, isX);
+    }
+};
 
-        cell = cell.split(' ');
-        if (cells[parseInt(cell[0])][parseInt(cell[1])] !== null) {
-            console.log(`Cell ${cell} is already set`);
-            display(cells, isX);
-        } else {
-            cells[parseInt(cell[0])][parseInt(cell[1])] = isX ? 'X' : 'O';
-            display(cells, !isX);
-        }
+const ask = (posx) => {
+    return new Promise((resolve) => {
+        readline.question(`Choose position ${posx ? 'x' : 'y'}`, (answer) => {
+            resolve(answer);
+        });
     });
+};
+
+const isValidInput = (x, y, cells) => {
+    x = parseInt(x);
+    y = parseInt(y);
+    if (x < 0 || x > 2 || y < 0 || y > 2) {
+        console.log('Position outside the grid');
+        return false;
+    }
+    if (cells[x][y] !== null) {
+        console.log('Cell already set');
+        return false;
+    }
+    return true;
 };
 
 const display = (cells, isX) => {
     grid(cells);
-    ask(cells, isX);
+    loop(cells, isX);
 };
 
 const grid = (cells) => {
