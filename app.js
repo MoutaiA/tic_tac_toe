@@ -21,7 +21,6 @@ const main = async () => {
 const loop = async (cells, isX) => {
 	const sign = isX ? 'X' : 'O';
 	if (numberOfTurn === GRID_HEIGHT * GRID_WIDTH) {
-		//TODO: Vérifier d'abord s'il y a un gagnant
 		console.log('The game is a draw');
 		readline.close();
 		return false;
