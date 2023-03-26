@@ -19,7 +19,9 @@ const main = async () => {
 };
 
 const loop = async (cells, isX) => {
+	const sign = isX ? 'X' : 'O';
 	if (numberOfTurn === GRID_HEIGHT * GRID_WIDTH) {
+		//TODO: Vérifier d'abord s'il y a un gagnant
 		console.log('The game is a draw');
 		readline.close();
 		return false;
@@ -33,11 +35,10 @@ const loop = async (cells, isX) => {
 	}
 	const posy = await ask(false);
 	if (isValidInput(posx, posy, cells)) {
-		const sign = isX ? 'X' : 'O';
 		cells[posx][posy] = sign;
 		display(cells, !isX);
 		if (MIN_VALUE_BEFORE_ALGORITHM <= numberOfTurn) {
-			const hasWin = checkIsWinner(cells, sign);
+			const hasWin = checkIsWinner(cells);
 			if (hasWin) {
 				console.log(`The player with the sign ${sign} have win!`);
 				readline.close();
@@ -94,55 +95,58 @@ const grid = (cells) => {
 
 const handleCellDisplay = (str) => (str ? (str === 'X' ? 'X' : 'O') : ' ');
 
-const checkIsWinner = (cells, sign) => {
+const checkIsWinner = (cells) => {
 	const visited = {};
 
 	for (let i = 0; i < cells.length; i++) {
 		for (let j = 0; j < cells[0].length; j++) {
 			if (!visited.hasOwnProperty(`${i},${j}`)) {
-				let counter = 0;
-				counter = Math.max(dfsRows(i, j, counter), counter);
-				counter = Math.max(dfsCols(i, j, counter), counter);
-				if (counter === MIN_VAL_VICTORY) {
-					return true;
-				}
+				return checkRows(i, j) || checkCols(i, j);
 			}
 		}
 	}
 
-	function dfsRows(i, j, counter) {
-		if (checkIsValid(i, j)) {
-			return counter;
+	function checkRows(i, j) {
+		const row = cells[i];
+		const sign = cells[i][j];
+		let isWinner = true;
+		for (const el of row) {
+			if (el !== sign) {
+				isWinner = false;
+				break;
+			}
 		}
-		visited[`${i},${j}`] = true;
-		counter++;
-
-		counter = Math.max(dfs(i - 1, j, counter), counter);
-		counter = Math.max(dfs(i + 1, j, counter), counter);
-
-		return counter;
+		return isWinner;
 	}
 
-	const checkIsValid = (i, j) => {
-		return (
-			i < 0 ||
-			i >= GRID_WIDTH ||
-			j < 0 ||
-			j >= GRID_HEIGHT ||
-			cells[i][j] !== sign ||
-			visited.hasOwnProperty(`${i},${j}`)
-		);
-	};
-
-	function dfsCols(i, j, counter) {
-		if (checkIsValid(i, j)) {
-			return counter;
+	function checkCols() {
+		const cols = [];
+		for (let i = 0; i < GRID_WIDTH; i++) {
+			const col = [];
+			for (let j = 0; j < GRID_HEIGHT; j++) {
+				col.push(cells[j][i]);
+			}
+			cols.push(col);
 		}
-		visited[`${i},${j}`] = true;
-		counter++;
 
-		counter = Math.max(dfs(i, j - 1, counter), counter);
-		counter = Math.max(dfs(i, j + 1, counter), counter);
+		for (const col of cols) {
+			let isWinner = true;
+			const sign = col[0];
+			if (!sign) {
+				continue;
+			}
+			for (const el of col) {
+				if (el !== sign) {
+					isWinner = false;
+					break;
+				}
+			}
+			if (isWinner) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	return false;
