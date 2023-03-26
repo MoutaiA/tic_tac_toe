@@ -101,7 +101,7 @@ const checkIsWinner = (cells) => {
 	for (let i = 0; i < cells.length; i++) {
 		for (let j = 0; j < cells[0].length; j++) {
 			if (!visited.hasOwnProperty(`${i},${j}`)) {
-				return checkRows(i, j) || checkCols(i, j);
+				return checkRows(i, j) || checkCols(i, j) || checkDiagonals();
 			}
 		}
 	}
@@ -146,6 +146,44 @@ const checkIsWinner = (cells) => {
 			}
 		}
 
+		return false;
+	}
+
+	function checkDiagonals() {
+		const left = [],
+			right = [];
+		for (let i = 0; i < GRID_WIDTH; i++) {
+			left.push(cells[i][i]);
+			right.push(cells[i][GRID_WIDTH - 1 - i]);
+		}
+
+		let sign = left[0];
+		if (sign) {
+			let isWinner = true;
+			for (const el of left) {
+				if (el !== sign) {
+					isWinner = false;
+					break;
+				}
+			}
+			if (isWinner) {
+				return true;
+			}
+		}
+
+		sign = right[0];
+		if (sign) {
+			let isWinner = true;
+			for (const el of right) {
+				if (el !== sign) {
+					isWinner = false;
+					break;
+				}
+			}
+			if (isWinner) {
+				return true;
+			}
+		}
 		return false;
 	}
 
